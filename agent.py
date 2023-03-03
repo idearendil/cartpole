@@ -48,15 +48,17 @@ class Cartpole_Agent():
                                           ).unsqueeze(dim=0).to(self.device)
             self.now_network.eval()
             value_tensor = torch.softmax(self.now_network.forward(obs_tensor),
-                                         dim=0)[0]
+                                         dim=1)[0]
             return boltzmann((0, 1),
                              value_tensor.cpu().numpy(),
                              tau=self.tau)
 
     def train(self):
 
-        if self.replay_buffer.size() < 5000:
+        if self.replay_buffer.size() < 300:
             return
+
+        print('train')
 
         self.delayed_network.eval()
         self.now_network.train()
@@ -67,25 +69,32 @@ class Cartpole_Agent():
 
         for batch in range(self.batch_num):
 
-            batch_data = self.replay_buffer.pull(self.batch_size)
+            with torch.no_grad():
+                batch_data = self.replay_buffer.pull(self.batch_size)
 
-            s_tensor = torch.from_numpy(np.array(batch_data[0])).to(
-                self.device)
-            a_tensor = torch.tensor(np.array(batch_data[1]),
-                                    dtype=torch.int64).to(self.device)
-            r_np = np.array(batch_data[2])
-            ss_tensor = torch.from_numpy(np.array(batch_data[3])).to(
-                self.device)
-            o_np = np.array(batch_data[4])
+                s_tensor = torch.from_numpy(np.array(batch_data[0])).to(
+                    self.device)
+                a_tensor = torch.tensor(np.array(batch_data[1]),
+                                        dtype=torch.int64).unsqueeze(dim=1).to(
+                    self.device)
+                r_np = np.array(batch_data[2])
+                ss_tensor = torch.from_numpy(np.array(batch_data[3])).to(
+                    self.device)
+                o_np = np.array(batch_data[4])
 
-            q_values_np = self.now_network.forward(ss_tensor).cpu().numpy()
-            max_actions = np.argmax(q_values_np, axis=1)
-            q_values_np = self.delayed_network.forward(ss_tensor).cpu().numpy()
-            q_values_np = np.take_along_axis(q_values_np, max_actions, axis=1)
+                q_values_np = self.now_network.forward(ss_tensor).cpu().numpy()
+                max_actions = np.argmax(q_values_np, axis=1)
+                q_values_np = self.delayed_network.forward(ss_tensor
+                                                           ).cpu().numpy()
+                q_values_lst = []
+                for data_id in range(self.batch_size):
+                    q_values_lst.append(
+                        q_values_np[data_id][max_actions[data_id]])
+                q_values_np = np.array(q_values_lst)
 
-            target_np = r_np + o_np * self.gamma * q_values_np
-            target_tensor = torch.tensor(target_np,
-                                         dtype=torch.float32).to(self.device)
+                target_np = r_np + o_np * self.gamma * q_values_np
+                target_tensor = torch.tensor(target_np, dtype=torch.float32
+                                             ).unsqueeze(dim=1).to(self.device)
 
             prediction = self.now_network.forward(s_tensor)
             q_values_prediction = prediction.gather(1, a_tensor)

@@ -15,9 +15,9 @@ def deep_q_learning():
 
     gamma = 0.98
     learning_rate = 0.003
-    tau = 1
+    tau = 0.01
     batch_num = 5
-    batch_size = 1024
+    batch_size = 64
     update_frequency = 10
     replay_buffer_size = 10000
     episodes_num = 1000
@@ -39,6 +39,7 @@ def deep_q_learning():
                 print(episode)
                 break
             observation = next_observation
+        agent.train()
         if episode % update_frequency == 0:
             agent.delayed_network_update()
 
