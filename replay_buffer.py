@@ -5,12 +5,12 @@ import random
 class Replay_Buffer():
     """
     Class of replay buffer.
-    This replay buffer has max size of 10000,
-    and includes functions such as push and pull.
-    Each data consists of s, a, r, s'.
+    This replay buffer includes functions such as push and pull.
+    Each data consists of s, a, r, s', o.
+    (if o is 0, then s' is terminal state.)
     """
-    def __init__(self, device):
-        self.buffer = deque(maxlen=10000)
+    def __init__(self, device, max_size):
+        self.buffer = deque(maxlen=max_size)
         self.device = device
 
     def push(self, data):
@@ -18,16 +18,17 @@ class Replay_Buffer():
 
     def pull(self, n):
         minibatch = random.sample(self.buffer, n)
-        s_lst, a_lst, v_lst, ss_lst = [], [], [], []
+        s_lst, a_lst, r_lst, ss_lst, o_lst = [], [], [], [], []
 
         for data in minibatch:
-            s, a, v, ss = data
+            s, a, r, ss, o = data
             s_lst.append(s)
             a_lst.append(a)
-            v_lst.append(v)
+            r_lst.append(r)
             ss_lst.append(ss)
+            o_lst.append(o)
 
-        return s_lst, a_lst, v_lst, ss_lst
+        return s_lst, a_lst, r_lst, ss_lst, o_lst
 
     def size(self):
         return len(self.buffer)
