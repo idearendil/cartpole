@@ -61,7 +61,7 @@ class Cartpole_Agent():
         self.delayed_network.eval()
         self.now_network.train()
 
-        criterion = nn.MSELoss().to(self.device)
+        criterion = nn.MSELoss()
         optimizer = torch.optim.Adam(self.now_network.parameters(),
                                      lr=self.learning_rate)
 
@@ -89,8 +89,11 @@ class Cartpole_Agent():
 
             prediction = self.now_network.forward(s_tensor)
             q_values_prediction = prediction.gather(1, a_tensor)
-            loss = criterion(q_values_prediction, target_tensor)
+            loss = criterion(q_values_prediction, target_tensor).to(
+                self.device)
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
+
+        dnn.save_network(self.now_network, "now_network")

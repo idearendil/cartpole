@@ -40,3 +40,7 @@ def deep_q_learning():
             observation = next_observation
         if episode % update_frequency == 0:
             agent.delayed_network_update()
+
+
+if __name__ == "__main__":
+    deep_q_learning()
