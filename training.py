@@ -24,11 +24,11 @@ def deep_q_learning():
 
     agent = Cartpole_Agent(device, gamma, learning_rate,
                            tau, batch_num, batch_size,
-                           replay_buffer_size, True)
+                           replay_buffer_size, False)
 
     env = gym.make('CartPole-v1', render_mode="human")
     for episode in range(episodes_num):
-        observation = env.reset()
+        observation = env.reset()[0]
         for _ in range(500):
             env.render()
             action = agent(observation)
@@ -36,6 +36,7 @@ def deep_q_learning():
             agent.replay_buffer.push((observation, action, reward,
                                       next_observation, 1-done))
             if done:
+                print(episode)
                 break
             observation = next_observation
         if episode % update_frequency == 0:

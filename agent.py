@@ -44,8 +44,8 @@ class Cartpole_Agent():
 
     def __call__(self, observation):
         with torch.no_grad():
-            obs_tensor = torch.FloatTensor(observation).unsqueeze(dim=0).to(
-                self.device)
+            obs_tensor = torch.from_numpy(np.array(observation)
+                                          ).unsqueeze(dim=0).to(self.device)
             self.now_network.eval()
             value_tensor = torch.softmax(self.now_network.forward(obs_tensor),
                                          dim=0)[0]
@@ -69,13 +69,13 @@ class Cartpole_Agent():
 
             batch_data = self.replay_buffer.pull(self.batch_size)
 
-            s_tensor = torch.tensor(np.array(batch_data[0]),
-                                    dtype=torch.float32).to(self.device)
+            s_tensor = torch.from_numpy(np.array(batch_data[0])).to(
+                self.device)
             a_tensor = torch.tensor(np.array(batch_data[1]),
                                     dtype=torch.int64).to(self.device)
             r_np = np.array(batch_data[2])
-            ss_tensor = torch.tensor(np.array(batch_data[3]),
-                                     dtype=torch.float32).to(self.device)
+            ss_tensor = torch.from_numpy(np.array(batch_data[3])).to(
+                self.device)
             o_np = np.array(batch_data[4])
 
             q_values_np = self.now_network.forward(ss_tensor).cpu().numpy()
