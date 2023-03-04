@@ -1,12 +1,17 @@
-from replay_buffer import Replay_Buffer
-import dnn
-import torch
-import torch.nn as nn
+"""
+CartpoleAgent class file
+"""
+
+
 import numpy as np
+import torch
+from torch import nn
+from replay_buffer import ReplayBuffer
+import dnn
 from exploration import boltzmann
 
 
-class Cartpole_Agent():
+class CartpoleAgent():
     """
     Class of cartpole playing agent.
     This class includes updating delayed_network from now_network,
@@ -35,10 +40,13 @@ class Cartpole_Agent():
                                                 model_name="delayed_network")
         self.now_network = dnn.load_network(device=device,
                                             model_name="now_network")
-        self.replay_buffer = Replay_Buffer(device=device,
-                                           max_size=replay_buffer_size)
+        self.replay_buffer = ReplayBuffer(device=device,
+                                          max_size=replay_buffer_size)
 
     def delayed_network_update(self):
+        """
+        Update delayed_network.
+        """
         dnn.save_network(self.now_network, "delayed_network")
         self.delayed_network = dnn.load_network(self.device, "delayed_network")
 
@@ -54,6 +62,9 @@ class Cartpole_Agent():
                              tau=self.tau)
 
     def train(self):
+        """
+        Train now_network with the data from replay_buffer.
+        """
 
         if self.replay_buffer.size() < 300:
             return
@@ -67,7 +78,7 @@ class Cartpole_Agent():
         optimizer = torch.optim.Adam(self.now_network.parameters(),
                                      lr=self.learning_rate)
 
-        for batch in range(self.batch_num):
+        for _ in range(self.batch_num):
 
             with torch.no_grad():
                 batch_data = self.replay_buffer.pull(self.batch_size)

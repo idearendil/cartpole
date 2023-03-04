@@ -1,6 +1,11 @@
+"""
+This file includes several exploration methods
+such as epsilon_greedy and boltzmann_greedy.
+"""
+
+import random
 import numpy as np
 import numpy.typing as npt
-import random
 
 
 def epsilon_greedy(actions: tuple,

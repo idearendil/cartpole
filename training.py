@@ -1,6 +1,10 @@
+"""
+This file executes training agent from cartpole environment.
+"""
+
 import torch
 import gym
-from agent import Cartpole_Agent
+from agent import CartpoleAgent
 
 
 def deep_q_learning():
@@ -15,16 +19,16 @@ def deep_q_learning():
 
     gamma = 0.98
     learning_rate = 0.003
-    tau = 0.01
+    tau = 0.5
     batch_num = 5
     batch_size = 64
     update_frequency = 10
     replay_buffer_size = 10000
     episodes_num = 1000
 
-    agent = Cartpole_Agent(device, gamma, learning_rate,
-                           tau, batch_num, batch_size,
-                           replay_buffer_size, False)
+    agent = CartpoleAgent(device, gamma, learning_rate,
+                          tau, batch_num, batch_size,
+                          replay_buffer_size, True)
 
     env = gym.make('CartPole-v1', render_mode="human")
     for episode in range(episodes_num):
@@ -32,7 +36,7 @@ def deep_q_learning():
         for _ in range(500):
             env.render()
             action = agent(observation)
-            next_observation, reward, done, _, info = env.step(action)
+            next_observation, reward, done, _, _ = env.step(action)
             agent.replay_buffer.push((observation, action, reward,
                                       next_observation, 1-done))
             if done:
@@ -42,6 +46,7 @@ def deep_q_learning():
         agent.train()
         if episode % update_frequency == 0:
             agent.delayed_network_update()
+            agent.tau *= 0.95
 
 
 if __name__ == "__main__":

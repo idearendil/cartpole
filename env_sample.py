@@ -1,3 +1,10 @@
+"""
+Example file of executing cartpole environment
+for who doesn't know how to execute the env and
+how information is given from the env.
+"""
+
+
 if __name__ == "__main__":
 
     import gym
@@ -11,6 +18,6 @@ if __name__ == "__main__":
             action = env.action_space.sample()
             observation, reward, done, _, info = env.step(action)
             if done:
-                print("Episode finished after {} timesteps".format(t+1))
+                print(f"Episode finished after {t+1} timesteps")
                 break
     env.close()
