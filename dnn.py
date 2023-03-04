@@ -1,8 +1,6 @@
 """
 Neural network file which includes saving, loading, and resetting network
 """
-
-import os
 import torch
 from torch import nn
 
@@ -64,10 +62,8 @@ def save_network(model, model_name):
     :arg model_name:
         The model's name which the model will be saved as.
     """
-    file_name = model_name + '.pt'
-    os.makedirs('./model', exist_ok=True)
-    output_path = os.path.join('./model', file_name)
-    torch.save(model.state_dict(), output_path)
+    file_name = './model/' + model_name + '.pt'
+    torch.save(model.state_dict(), file_name)
 
 
 def load_network(device, model_name) -> Network:

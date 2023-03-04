@@ -49,8 +49,10 @@ def boltzmann(actions: tuple, weights: npt.NDArray[np.float32], tau: float):
     :returns:
         chosen action among actions
     """
+    # print(weights)
     max_weight = np.max(weights)
     exp_weights = np.exp((weights - max_weight) / tau)
     sum_exp_weights = np.sum(exp_weights)
     final_weights = exp_weights / sum_exp_weights
+    # print(final_weights)
     return random.choices(actions, weights=final_weights, k=1)[0]

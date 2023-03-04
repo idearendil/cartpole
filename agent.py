@@ -61,6 +61,18 @@ class CartpoleAgent():
                              value_tensor.cpu().numpy(),
                              tau=self.tau)
 
+    def test(self, observation):
+        """
+        Select an action in test mode(only exploitation mode).
+        """
+        with torch.no_grad():
+            obs_tensor = torch.from_numpy(np.array(observation)
+                                          ).unsqueeze(dim=0).to(self.device)
+            self.now_network.eval()
+            value_tensor = torch.softmax(self.now_network.forward(obs_tensor),
+                                         dim=1)[0]
+            return np.argmax(value_tensor.cpu().numpy())
+
     def train(self):
         """
         Train now_network with the data from replay_buffer.
@@ -69,14 +81,15 @@ class CartpoleAgent():
         if self.replay_buffer.size() < 300:
             return
 
-        print('train')
+        # print(f'train - learning_rate: {self.learning_rate}, tau: {
+        # self.tau}')
 
         self.delayed_network.eval()
         self.now_network.train()
 
         criterion = nn.MSELoss()
-        optimizer = torch.optim.Adam(self.now_network.parameters(),
-                                     lr=self.learning_rate)
+        optimizer = torch.optim.SGD(self.now_network.parameters(),
+                                    lr=self.learning_rate)
 
         for _ in range(self.batch_num):
 
