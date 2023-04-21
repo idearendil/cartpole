@@ -31,10 +31,12 @@ def deep_q_learning():
                           tau, batch_num, batch_size,
                           replay_buffer_size, True)
 
-    env = gym.make('CartPole-v1')
+    # env = gym.make('CartPole-v1')
+    env = gym.make('CartPole-v1', render_mode="human")
     for episode in range(episodes_num):
         observation = env.reset()[0]
         for _ in range(500):
+            env.render()
             action = agent(observation)
             next_observation, reward, done, _, _ = env.step(action)
             if done:
